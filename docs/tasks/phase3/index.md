@@ -46,11 +46,16 @@ graph TD
     P3_19 --> P3_20["3.20 sdk/middleware/agent.go"]
     P3_19 --> P3_21["3.21 sdk/middleware/provider.go"]
     P3_19 --> P3_22["3.22 sdk/helpers/ratelimit.go"]
+    P3_19 --> P3_24["3.24 sdk/workflow/state.go"]
     
     P3_20 --> P3_23["3.23 sdk/middleware/middleware_test.go"]
     P3_21 --> P3_23
     P3_22 --> P3_23
-    P3_23 --> P3_24["3.24 verify.md"]
+    
+    P3_24 --> P3_25["3.25 sdk/workflow/workflow_test.go"]
+    
+    P3_23 --> P3_26["3.26 verify.md"]
+    P3_25 --> P3_26
 ```
 
 ---
@@ -85,7 +90,7 @@ graph TD
 | 3.11 | [micro_3.11_tool_result.md](micro_3.11_tool_result.md) | `sdk/tool/result.go` | Fluent results and system errors builders for tool execution. |
 | 3.12 | [micro_3.12_tool_test.md](micro_3.12_tool_test.md) | `sdk/tool/tool_test.go` | Schema validation edge cases and failure checks testing. |
 
-### 5. Support Skeletons SDK (6 tasks)
+### 5. Support Skeletons SDK (8 tasks)
 | Task | File | Target | Description |
 |---|---|---|---|
 | 3.13 | [micro_3.13_workflow_helper.md](micro_3.13_workflow_helper.md) | `sdk/workflow/workflow.go` | DAG task steps scheduler utility. |
@@ -94,6 +99,8 @@ graph TD
 | 3.16 | [micro_3.16_search_helpers.md](micro_3.16_search_helpers.md) | `sdk/search/search.go` | Local search engine query/index helpers. |
 | 3.17 | [micro_3.17_task_builder.md](micro_3.17_task_builder.md) | `sdk/task/task.go` | Fluent Task builder API with validation. |
 | 3.18 | [micro_3.18_testing_mocks.md](micro_3.18_testing_mocks.md) | `sdk/testing/mocks.go` | Mocks for Agent, Provider, Tool, and EventBus for plugin verification. |
+| 3.24 | [micro_3.24_workflow_state.md](micro_3.24_workflow_state.md) | `sdk/workflow/state.go` | WorkflowState parameter resolution engine. |
+| 3.25 | [micro_3.25_workflow_test.md](micro_3.25_workflow_test.md) | `sdk/workflow/workflow_test.go` | Unit tests for sorting and parameter state resolution. |
 
 ### 6. Middlewares & Helpers (4 tasks)
 | Task | File | Target | Description |
@@ -107,7 +114,7 @@ graph TD
 | Task | File | Target | Description |
 |---|---|---|---|
 | 3.19 | [micro_3.19_mocks_test.md](micro_3.19_mocks_test.md) | `sdk/testing/mocks_test.go` | Verify mock reliability and behavior injection. |
-| 3.24 | [micro_3.24_verify.md](micro_3.24_verify.md) | — | Verification checklist, build & test validations. |
+| 3.26 | [micro_3.26_verify.md](micro_3.26_verify.md) | — | Verification checklist, build & test validations. |
 
 ---
 
@@ -119,7 +126,7 @@ graph TD
 | Agent SDK | 3 | 65 min |
 | Provider SDK | 4 | 85 min |
 | Tool SDK | 3 | 55 min |
-| Support Skeletons | 6 | 100 min |
+| Support Skeletons | 8 | 135 min |
 | Middlewares & Helpers | 4 | 80 min |
 | Verification | 2 | 30 min |
-| **Total** | **24** | **~7.5 hours** |
+| **Total** | **26** | **~8.3 hours** |

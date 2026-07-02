@@ -1,8 +1,8 @@
-# Micro-Task 3.24: Verification — Build & Test toàn bộ Phase 3
+# Micro-Task 3.26: Verification — Build & Test toàn bộ Phase 3
 
 ## Thông tin
 - **File tạo**: Không tạo file nào (chỉ verify)
-- **Dependencies trước**: TẤT CẢ micro-tasks 3.01 → 3.23
+- **Dependencies trước**: TẤT CẢ micro-tasks 3.01 → 3.25
 - **Thời gian**: 15 phút
 - **Mục đích**: Đảm bảo TẤT CẢ các thư viện SDK (Base classes, Middlewares, và Helpers) biên dịch thành công, không bị lỗi import vòng tròn (import cycles), và vượt qua tất cả các tests với bộ phát hiện tranh chấp bộ nhớ (race detector).
 
@@ -30,8 +30,10 @@ ls sdk/tool/tool.go
 ls sdk/tool/result.go
 ls sdk/tool/tool_test.go
 
-# Support Skeletons
+# Support Skeletons & Workflows
 ls sdk/workflow/workflow.go
+ls sdk/workflow/state.go
+ls sdk/workflow/workflow_test.go
 ls sdk/context/builder.go
 ls sdk/memory/memory.go
 ls sdk/search/search.go
@@ -85,7 +87,7 @@ go build ./...
 ### Step 7: Git Commit
 ```bash
 git add -A
-git commit -m "Phase 3: SDK Developer Helpers implementation (24 micro-tasks)"
+git commit -m "Phase 3: SDK Developer Helpers implementation (26 micro-tasks)"
 git push origin main
 ```
 
@@ -95,12 +97,13 @@ git push origin main
 - [ ] `sdk/plugin/plugin.go` — Định nghĩa `BasePlugin` hỗ trợ đầy đủ trạng thái `initialized`, `started` và report health 1.40.
 - [ ] `sdk/agent/manifest.go` — Hàm `LoadManifest` phân giải PromptFile tương đối theo thư mục tệp YAML.
 - [ ] `sdk/agent/prompt.go` — `BuildPrompt` tách biệt rõ ràng Instruction và Context Items thành các messages riêng.
-- [ ] `sdk/agent/agent.go` — `BaseAgent` thực hiện ReAct loop song song hóa tool calls (`sync.WaitGroup`) và bảo vệ chống lặp vô hạn.
+- [ ] `sdk/agent/agent.go` — `BaseAgent` thực hiện ReAct loop hỗ trợ Streaming callbacks qua Context, song song hóa tool calls (`sync.WaitGroup`) và bảo vệ chống lặp vô hạn.
 - [ ] `sdk/provider/provider.go` — `BaseProvider` sao chép slice `models` trước khi trả về để tránh đột biến bộ nhớ ngoài luồng.
 - [ ] `sdk/provider/request.go` — `RequestBuilder` triển khai dạng bất biến (immutable) an toàn đa luồng.
 - [ ] `sdk/provider/stream.go` — `CollectStream` tự động drain channel trong background khi hủy context để tránh rò rỉ producer.
 - [ ] `sdk/tool/tool.go` — `BaseTool` tự động xác thực kiểu dữ liệu JSON thô (bao gồm ép kiểu integer của float64) đối chiếu với schema.
 - [ ] `sdk/tool/result.go` — Trình sinh kết quả `JSON()` trả về system error nếu marshal thất bại.
+- [ ] `sdk/workflow/state.go` — `WorkflowState` quản lý trạng thái các bước chạy và đệ quy phân giải biểu thức `{{ inputs.Key }}` hoặc `{{ steps.Name.output.field }}` an toàn đa luồng.
 - [ ] `sdk/middleware/agent.go` — Đầy đủ Agent Logging, Metrics, và Recovery middlewares.
 - [ ] `sdk/middleware/provider.go` — Đầy đủ Provider Logging, Retry, CircuitBreaker, và Metrics middlewares.
 - [ ] `sdk/helpers/ratelimit.go` — Triển khai Rate Limiter dạng Token Bucket an toàn đa luồng, giải phóng lock trước khi chờ.
