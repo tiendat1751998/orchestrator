@@ -11,13 +11,13 @@
 ```go
 module github.com/tiendat1751998/orchestrator
 
-go 1.23.0
+go 1.26.0
 ```
 
 ## Quy tắc
 1. KHÔNG thêm bất kỳ `require` nào lúc này
 2. Module path PHẢI khớp với GitHub repo URL
-3. Go version: dùng version stable mới nhất (≥ 1.23)
+3. Go version: dùng version stable mới nhất (≥ 1.26)
 
 ## Lệnh verify
 ```bash
@@ -28,5 +28,5 @@ go mod tidy
 ## Checklist
 - [ ] File `go.mod` tồn tại ở root
 - [ ] Module path đúng: `github.com/tiendat1751998/orchestrator`
-- [ ] Go version ≥ 1.23
+- [ ] Go version ≥ 1.26
 - [ ] `go mod tidy` không lỗi
