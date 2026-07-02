@@ -1,4 +1,4 @@
-# GEMINI 2.5 Flash / Pro Transfer Prompt — Orchestrator Project
+# GEMINI 3.5 Flash / Pro Transfer Prompt — Orchestrator Project
 
 > **How to use**: Copy everything below the `---` line and paste into Gemini (AI Studio or App).
 > Then ask ONE of:
