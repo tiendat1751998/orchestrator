@@ -1,10 +1,10 @@
-# Micro-Task 3.20: Verification — Build & Test toàn bộ Phase 3
+# Micro-Task 3.24: Verification — Build & Test toàn bộ Phase 3
 
 ## Thông tin
 - **File tạo**: Không tạo file nào (chỉ verify)
-- **Dependencies trước**: TẤT CẢ micro-tasks 3.01 → 3.19
+- **Dependencies trước**: TẤT CẢ micro-tasks 3.01 → 3.23
 - **Thời gian**: 15 phút
-- **Mục đích**: Đảm bảo TẤT CẢ các thư viện SDK (Base classes & helpers) biên dịch thành công, không bị lỗi import vòng tròn (import cycles), và vượt qua tất cả các tests với bộ phát hiện tranh chấp bộ nhớ (race detector).
+- **Mục đích**: Đảm bảo TẤT CẢ các thư viện SDK (Base classes, Middlewares, và Helpers) biên dịch thành công, không bị lỗi import vòng tròn (import cycles), và vượt qua tất cả các tests với bộ phát hiện tranh chấp bộ nhớ (race detector).
 
 ## Lệnh verify (PHẢI chạy theo đúng thứ tự)
 
@@ -36,6 +36,12 @@ ls sdk/context/builder.go
 ls sdk/memory/memory.go
 ls sdk/search/search.go
 ls sdk/task/task.go
+
+# Middlewares & Helpers
+ls sdk/middleware/agent.go
+ls sdk/middleware/provider.go
+ls sdk/middleware/middleware_test.go
+ls sdk/helpers/ratelimit.go
 
 # Testing SDK Mocks
 ls sdk/testing/mocks.go
@@ -79,7 +85,7 @@ go build ./...
 ### Step 7: Git Commit
 ```bash
 git add -A
-git commit -m "Phase 3: SDK Developer Helpers implementation (20 micro-tasks)"
+git commit -m "Phase 3: SDK Developer Helpers implementation (24 micro-tasks)"
 git push origin main
 ```
 
@@ -95,6 +101,9 @@ git push origin main
 - [ ] `sdk/provider/stream.go` — `CollectStream` tự động drain channel trong background khi hủy context để tránh rò rỉ producer.
 - [ ] `sdk/tool/tool.go` — `BaseTool` tự động xác thực kiểu dữ liệu JSON thô (bao gồm ép kiểu integer của float64) đối chiếu với schema.
 - [ ] `sdk/tool/result.go` — Trình sinh kết quả `JSON()` trả về system error nếu marshal thất bại.
+- [ ] `sdk/middleware/agent.go` — Đầy đủ Agent Logging, Metrics, và Recovery middlewares.
+- [ ] `sdk/middleware/provider.go` — Đầy đủ Provider Logging, Retry, CircuitBreaker, và Metrics middlewares.
+- [ ] `sdk/helpers/ratelimit.go` — Triển khai Rate Limiter dạng Token Bucket an toàn đa luồng, giải phóng lock trước khi chờ.
 - [ ] `sdk/testing/mocks.go` — `MockEventBus` bảo vệ ghi đồng thời bằng `sync.RWMutex`.
 
 ### Quality Gates

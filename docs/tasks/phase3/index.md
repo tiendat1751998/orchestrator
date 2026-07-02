@@ -43,7 +43,14 @@ graph TD
     P3_15 --> P3_18["3.18 sdk/testing/mocks.go"]
     
     P3_18 --> P3_19["3.19 sdk/testing/mocks_test.go"]
-    P3_19 --> P3_20["3.20 verify.md"]
+    P3_19 --> P3_20["3.20 sdk/middleware/agent.go"]
+    P3_19 --> P3_21["3.21 sdk/middleware/provider.go"]
+    P3_19 --> P3_22["3.22 sdk/helpers/ratelimit.go"]
+    
+    P3_20 --> P3_23["3.23 sdk/middleware/middleware_test.go"]
+    P3_21 --> P3_23
+    P3_22 --> P3_23
+    P3_23 --> P3_24["3.24 verify.md"]
 ```
 
 ---
@@ -88,11 +95,19 @@ graph TD
 | 3.17 | [micro_3.17_task_builder.md](micro_3.17_task_builder.md) | `sdk/task/task.go` | Fluent Task builder API with validation. |
 | 3.18 | [micro_3.18_testing_mocks.md](micro_3.18_testing_mocks.md) | `sdk/testing/mocks.go` | Mocks for Agent, Provider, Tool, and EventBus for plugin verification. |
 
-### 6. Verification (2 tasks)
+### 6. Middlewares & Helpers (4 tasks)
+| Task | File | Target | Description |
+|---|---|---|---|
+| 3.20 | [micro_3.20_agent_middleware.md](micro_3.20_agent_middleware.md) | `sdk/middleware/agent.go` | Agent middlewares (Logging, Metrics, Recovery). |
+| 3.21 | [micro_3.21_provider_middleware.md](micro_3.21_provider_middleware.md) | `sdk/middleware/provider.go` | Provider middlewares (Logging, Retry, Breaker, Metrics). |
+| 3.22 | [micro_3.22_ratelimiter.md](micro_3.22_ratelimiter.md) | `sdk/helpers/ratelimit.go` | Token Bucket rate limiter concurrency helper. |
+| 3.23 | [micro_3.23_middleware_test.md](micro_3.23_middleware_test.md) | `sdk/middleware/middleware_test.go` | Middlewares and Rate limiter verification tests. |
+
+### 7. Verification & Mocks Testing (2 tasks)
 | Task | File | Target | Description |
 |---|---|---|---|
 | 3.19 | [micro_3.19_mocks_test.md](micro_3.19_mocks_test.md) | `sdk/testing/mocks_test.go` | Verify mock reliability and behavior injection. |
-| 3.20 | [micro_3.20_verify.md](micro_3.20_verify.md) | — | Verification checklist, build & test validations. |
+| 3.24 | [micro_3.24_verify.md](micro_3.24_verify.md) | — | Verification checklist, build & test validations. |
 
 ---
 
@@ -105,5 +120,6 @@ graph TD
 | Provider SDK | 4 | 85 min |
 | Tool SDK | 3 | 55 min |
 | Support Skeletons | 6 | 100 min |
+| Middlewares & Helpers | 4 | 80 min |
 | Verification | 2 | 30 min |
-| **Total** | **20** | **~6.2 hours** |
+| **Total** | **24** | **~7.5 hours** |
