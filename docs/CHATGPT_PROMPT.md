@@ -1,8 +1,11 @@
-# ChatGPT Transfer Prompt — Orchestrator Project
+# GEMINI 2.5 Flash / Pro Transfer Prompt — Orchestrator Project
 
-> **How to use**: Copy everything below the `---` line and paste it into ChatGPT.
-> Then ask: "Create micro-tasks for Phase 3" (or Phase 4, 5, 6).
-> Each phase should be a separate conversation to avoid context limits.
+> **How to use**: Copy everything below the `---` line and paste into Gemini (AI Studio or App).
+> Then ask ONE of:
+> - "Enhance Phase 1 contracts to production quality" (creates enhancement micro-tasks)
+> - "Enhance Phase 2 kernel to production quality" (creates enhancement micro-tasks)
+> - "Create micro-tasks for Phase 3" (new phase)
+> Each phase should be a separate conversation.
 
 ---
 
@@ -349,3 +352,388 @@ All kernel components implemented and tested. Key APIs:
 ---
 
 Now create micro-tasks for **Phase [NUMBER]**.
+
+---
+---
+
+# APPENDIX: PRODUCTION HARDENING (Phase 1 & 2 Enhancement)
+
+> Use this section when asking: "Enhance Phase 1/2 to production quality"
+
+## WHAT'S MISSING from current Phase 1 & 2
+
+The current micro-tasks cover basic functionality but are NOT production-ready. Here's exactly what's missing and needs to be added as new micro-tasks:
+
+---
+
+### GAP 1: Structured Error Types (current: raw fmt.Errorf strings)
+
+**Problem**: Errors are plain strings. Callers can't programmatically distinguish between "not found", "timeout", "validation", "permission denied".
+
+**What to add** (contracts/errors/ package):
+```go
+// contracts/errors/errors.go
+
+// Error categories — callers use errors.Is() to check
+type NotFoundError struct { Resource, Name string }
+type ValidationError struct { Field, Message string }
+type TimeoutError struct { Duration time.Duration }
+type ConflictError struct { Resource, Name string }
+type PermissionError struct { Action, Resource string }
+type RetryableError struct { Err error; RetryAfter time.Duration }
+
+// IsRetryable(err) bool — checks if error should be retried
+// IsNotFound(err) bool — checks if resource was not found
+// Wrap(err, "context") — adds context while preserving error type
+```
+
+**Why production needs this**:
+- Retry logic: only retry `RetryableError`, not `ValidationError`
+- HTTP API: `NotFoundError` → 404, `ValidationError` → 400, `TimeoutError` → 504
+- Logging: different severity for different error types
+- Circuit breaker: only trip on `RetryableError`
+
+---
+
+### GAP 2: Context Propagation (current: ctx passed but not enriched)
+
+**Problem**: Context is passed through but doesn't carry request-scoped data (trace ID, task ID, deadline info).
+
+**What to add** (contracts/context/ package enhancement):
+```go
+// contracts/context/context.go
+
+type Key string
+const (
+    KeyTraceID   Key = "trace_id"
+    KeyTaskID    Key = "task_id"
+    KeyMissionID Key = "mission_id"
+    KeyAgentName Key = "agent_name"
+)
+
+func WithTraceID(ctx context.Context, traceID string) context.Context
+func TraceIDFrom(ctx context.Context) string
+func WithTaskID(ctx context.Context, taskID string) context.Context
+func TaskIDFrom(ctx context.Context) string
+
+// Every log line automatically includes trace_id + task_id
+// Every error wraps with trace_id for correlation
+```
+
+**Why production needs this**:
+- Distributed tracing across agent calls
+- Log correlation: find ALL logs for a single task
+- Deadline propagation: parent timeout flows to child operations
+
+---
+
+### GAP 3: Retry & Circuit Breaker (current: no retry logic)
+
+**Problem**: When a provider call fails, the system just returns the error. No retry, no backoff, no circuit breaker.
+
+**What to add** (kernel/resilience/ package):
+```go
+// kernel/resilience/retry.go
+type RetryConfig struct {
+    MaxAttempts int           // Default: 3
+    InitialWait time.Duration // Default: 1s
+    MaxWait     time.Duration // Default: 30s
+    Multiplier  float64       // Default: 2.0 (exponential backoff)
+    Jitter      bool          // Default: true (randomize wait ±25%)
+}
+
+func Retry(ctx context.Context, cfg RetryConfig, fn func() error) error
+func RetryWithResult[T any](ctx context.Context, cfg RetryConfig, fn func() (T, error)) (T, error)
+
+// kernel/resilience/circuitbreaker.go
+type CircuitBreaker struct { ... }
+// States: Closed (normal) → Open (failing) → HalfOpen (testing)
+// Trips after N consecutive failures
+// Resets after timeout
+```
+
+**Why production needs this**:
+- API rate limits → retry with backoff
+- Transient network errors → retry
+- Provider down → circuit breaker prevents hammering
+- Jitter prevents thundering herd
+
+---
+
+### GAP 4: Metrics & Observability Hooks (current: only logging)
+
+**Problem**: No metrics collection. Can't answer: "How many tasks/sec?", "What's P99 latency?", "Which agent is slowest?"
+
+**What to add** (kernel/metrics/ package):
+```go
+// kernel/metrics/metrics.go
+type Metrics interface {
+    Counter(name string, tags map[string]string) CounterMetric
+    Histogram(name string, tags map[string]string) HistogramMetric
+    Gauge(name string, tags map[string]string) GaugeMetric
+}
+
+type CounterMetric interface { Inc(); Add(float64) }
+type HistogramMetric interface { Observe(float64) }
+type GaugeMetric interface { Set(float64) }
+
+// In-memory implementation for Phase 2
+// Prometheus/OpenTelemetry adapter for Phase 5
+
+// Standard metrics to track:
+// - orchestrator_tasks_total (counter, by status)
+// - orchestrator_task_duration_seconds (histogram, by agent)
+// - orchestrator_active_workers (gauge)
+// - orchestrator_queue_depth (gauge)
+// - orchestrator_provider_requests_total (counter, by provider+model)
+// - orchestrator_provider_tokens_total (counter, by provider)
+// - orchestrator_provider_latency_seconds (histogram, by provider)
+```
+
+---
+
+### GAP 5: Graceful Degradation (current: fail-fast on any error)
+
+**Problem**: If ONE provider fails, the entire system stops. No fallback, no degradation.
+
+**What to add**:
+```go
+// kernel/runtime/executor.go — enhance ExecuteTask
+
+// Current: one agent fails → task fails → done
+// Production: try fallback agents, emit degradation events
+
+func (e *Executor) ExecuteTask(ctx, task) (*Result, error) {
+    agents := e.registry.FindAllAgentsForTask(task)
+    
+    for i, agent := range agents {
+        result, err := e.tryAgent(ctx, agent, task)
+        if err == nil {
+            return result, nil
+        }
+        
+        if !errors.IsRetryable(err) {
+            return nil, err // Non-retryable → fail immediately
+        }
+        
+        // Log fallback attempt
+        e.logger.Warn("agent failed, trying fallback",
+            "failed_agent", agent.Name(),
+            "attempt", i+1,
+            "total_agents", len(agents),
+        )
+    }
+    return nil, fmt.Errorf("all %d agents failed for task %q", len(agents), task.Name)
+}
+```
+
+---
+
+### GAP 6: Input Validation on All Structs (current: minimal)
+
+**Problem**: Structs accept any input. Invalid data propagates deep into the system before failing with confusing errors.
+
+**What to add**: `Validate() error` method on EVERY struct that holds user input.
+
+```go
+// contracts/agent/task.go
+func (t *Task) Validate() error {
+    if t.ID == "" { return errors.NewValidation("task", "id", "required") }
+    if t.Name == "" { return errors.NewValidation("task", "name", "required") }
+    if t.Type == "" { return errors.NewValidation("task", "type", "required") }
+    if t.Timeout < 0 { return errors.NewValidation("task", "timeout", "must be >= 0") }
+    // Check dependencies: no duplicates, no self-reference
+    seen := make(map[TaskID]bool)
+    for _, dep := range t.Dependencies {
+        if dep == t.ID { return errors.NewValidation("task", "dependencies", "self-dependency") }
+        if seen[dep] { return errors.NewValidation("task", "dependencies", "duplicate: "+string(dep)) }
+        seen[dep] = true
+    }
+    return nil
+}
+
+// contracts/provider/request.go
+func (r *Request) Validate() error {
+    if r.Model == "" { return errors.NewValidation("request", "model", "required") }
+    if len(r.Messages) == 0 { return errors.NewValidation("request", "messages", "at least one required") }
+    if r.Temperature < 0 || r.Temperature > 2 { return errors.NewValidation("request", "temperature", "must be 0-2") }
+    if r.MaxTokens < 0 { return errors.NewValidation("request", "max_tokens", "must be >= 0") }
+    return nil
+}
+```
+
+---
+
+### GAP 7: Event Bus — Dead Letter Queue (current: events silently dropped if handler panics)
+
+**Problem**: If an event handler panics, the event is lost. No record of failure. No retry.
+
+**What to add**:
+```go
+// kernel/eventbus/dlq.go (Dead Letter Queue)
+type DeadLetterEntry struct {
+    Event     event.Event
+    Error     string
+    Handler   string // handler function name
+    Timestamp time.Time
+    Attempts  int
+}
+
+type DeadLetterQueue struct {
+    mu      sync.Mutex
+    entries []DeadLetterEntry
+    maxSize int // Default: 1000 (ring buffer)
+}
+
+func (dlq *DeadLetterQueue) Add(entry DeadLetterEntry)
+func (dlq *DeadLetterQueue) Entries() []DeadLetterEntry
+func (dlq *DeadLetterQueue) Len() int
+func (dlq *DeadLetterQueue) Clear()
+```
+
+---
+
+### GAP 8: Config Hot-Reload (current: load once at startup)
+
+**Problem**: Changing log level or max workers requires restarting the kernel.
+
+**What to add**:
+```go
+// kernel/config/watcher.go
+type Watcher struct { ... }
+
+func NewWatcher(path string, onChange func(*Config)) *Watcher
+func (w *Watcher) Start(ctx context.Context) error // Watches file for changes
+func (w *Watcher) Stop()
+
+// Hot-reloadable fields (safe to change at runtime):
+// - log_level
+// - max_concurrent_tasks
+// - provider timeout
+//
+// NON-reloadable fields (require restart):
+// - provider type
+// - provider binary path
+// - listen address
+```
+
+---
+
+### GAP 9: Health Check Depth (current: shallow Health() method)
+
+**Problem**: `Health()` returns nil or error. No structured health info.
+
+**What to add**:
+```go
+// contracts/plugin/health.go
+type HealthStatus string
+const (
+    HealthOK       HealthStatus = "ok"
+    HealthDegraded HealthStatus = "degraded"
+    HealthDown     HealthStatus = "down"
+)
+
+type HealthReport struct {
+    Status    HealthStatus          `json:"status"`
+    Message   string                `json:"message,omitempty"`
+    Details   map[string]any        `json:"details,omitempty"`
+    Children  map[string]HealthReport `json:"children,omitempty"`
+    Timestamp time.Time             `json:"timestamp"`
+    Duration  time.Duration         `json:"duration"`
+}
+
+// Kernel aggregates health from all plugins into a tree:
+// {
+//   "status": "degraded",
+//   "children": {
+//     "provider:antigravity": {"status": "ok", "duration": "5ms"},
+//     "provider:gemini": {"status": "down", "message": "connection refused"},
+//     "agent:coder": {"status": "ok"}
+//   }
+// }
+```
+
+---
+
+### GAP 10: Resource Cleanup Guarantees (current: defer but no verification)
+
+**Problem**: If Stop() panics or hangs, resources leak. No verification that cleanup actually happened.
+
+**What to add**:
+```go
+// kernel/runtime/runtime.go — enhance Stop()
+func (r *Runtime) Stop(ctx context.Context) error {
+    // ... existing code ...
+    
+    // After stopping, verify no goroutine leaks
+    // Check pool stats
+    stats := r.pool.Stats()
+    if stats.ActiveWorkers > 0 {
+        r.logger.Error("goroutine leak detected",
+            "active_workers", stats.ActiveWorkers,
+            "submitted", stats.TotalSubmitted,
+            "completed", stats.TotalCompleted,
+        )
+    }
+    
+    // Verify result channel is drained
+    remaining := 0
+    for range r.dispatcher.Results() {
+        remaining++
+    }
+    if remaining > 0 {
+        r.logger.Warn("undrained results", "count", remaining)
+    }
+}
+```
+
+---
+
+## HOW TO ASK GEMINI FOR ENHANCEMENTS
+
+Use this exact prompt pattern:
+
+```
+Based on the gaps listed in "APPENDIX: PRODUCTION HARDENING",
+create enhancement micro-tasks for Phase [1 or 2].
+
+For Phase 1:
+- Number them 1.37, 1.38, ... (continuing from existing 1.36)
+- Focus on: structured errors, input validation, health reports, context propagation
+
+For Phase 2:
+- Number them 2.36, 2.37, ... (continuing from existing 2.35)
+- Focus on: retry/circuit breaker, metrics hooks, dead letter queue, config hot-reload, graceful degradation, resource cleanup
+
+Each enhancement micro-task must:
+1. Show the EXACT file to modify or create
+2. Show the COMPLETE updated code (not just the diff)
+3. Explain what was added and WHY
+4. Include tests for the new functionality
+5. Have a verify command
+```
+
+---
+
+## PRODUCTION QUALITY CHECKLIST
+
+When reviewing any micro-task output, verify it covers:
+
+- [ ] **Error types**: Uses structured errors, not string formatting
+- [ ] **Input validation**: Every public function validates its inputs
+- [ ] **Context propagation**: trace_id and task_id flow through all calls
+- [ ] **Timeout handling**: Every blocking operation has a timeout
+- [ ] **Retry logic**: Transient failures are retried with backoff
+- [ ] **Circuit breaker**: Repeated failures trip a breaker
+- [ ] **Metrics**: Key operations emit counters/histograms
+- [ ] **Health checks**: Every component reports structured health
+- [ ] **Graceful degradation**: Fallback agents, not immediate failure
+- [ ] **Resource cleanup**: Verified in Stop(), goroutine leak detection
+- [ ] **Dead letter queue**: Failed events are captured, not dropped
+- [ ] **Hot-reload**: Runtime config changes without restart
+- [ ] **Thread-safety**: Race detector passes (`go test -race`)
+- [ ] **Idempotent operations**: Start/Stop/Subscribe safe to call multiple times
+- [ ] **Panic recovery**: Never crash the process, always recover + log
+- [ ] **Backpressure**: Bounded channels/queues, no unbounded growth
+- [ ] **Deterministic ordering**: Registration order preserved (not map iteration)
+- [ ] **Error wrapping**: `fmt.Errorf("component: action: %w", err)` — preserves chain
