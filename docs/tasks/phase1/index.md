@@ -105,11 +105,19 @@ graph TD
 | 1.33 | [micro_1.33_gateway.md](micro_1.33_gateway.md) | `contracts/gateway/gateway.go` | 5 min |
 | 1.34 | [micro_1.34_feedback.md](micro_1.34_feedback.md) | `contracts/feedback/feedback.go` | 10 min |
 
+### Production Hardening (4 tasks)
+| # | Micro-task file | Target file | Thời gian |
+|---|---|---|---|
+| 1.37 | [micro_1.37_structured_errors.md](micro_1.37_structured_errors.md) | `contracts/errors.go` (Enhanced) | 20 min |
+| 1.38 | [micro_1.38_context_metadata.md](micro_1.38_context_metadata.md) | `contracts/context/metadata.go` | 15 min |
+| 1.39 | [micro_1.39_input_validation.md](micro_1.39_input_validation.md) | `contracts/agent/task.go`, `contracts/provider/request.go` | 20 min |
+| 1.40 | [micro_1.40_health_report.md](micro_1.40_health_report.md) | `contracts/plugin/health.go`, `contracts/plugin/plugin.go` | 20 min |
+
 ### Entry Point & Verification (2 tasks)
 | # | Micro-task file | Target file | Thời gian |
 |---|---|---|---|
-| 1.35 | [micro_1.35_cmd_main.md](micro_1.35_cmd_main.md) | `cmd/orchestrator/main.go` | 5 min |
-| 1.36 | [micro_1.36_verify.md](micro_1.36_verify.md) | — (verification only) | 15 min |
+| 1.41 | [micro_1.35_cmd_main.md](micro_1.35_cmd_main.md) | `cmd/orchestrator/main.go` | 5 min |
+| 1.42 | [micro_1.36_verify.md](micro_1.36_verify.md) | — (verification only) | 15 min |
 
 ---
 
@@ -123,8 +131,9 @@ graph TD
 | Tool Contracts | 3 | 35 min |
 | Agent Contracts | 6 | 80 min |
 | Other Contracts | 12 | 120 min |
+| Production Hardening | 4 | 75 min |
 | Entry Point + Verify | 2 | 20 min |
-| **Tổng** | **36** | **~6.5 giờ** |
+| **Tổng** | **40** | **~7.7 giờ** |
 
 ## Cách sử dụng
 

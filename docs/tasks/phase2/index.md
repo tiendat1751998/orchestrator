@@ -116,7 +116,20 @@ graph TD
 | 2.32 | [micro_2.32_kernel_bootstrap.md](micro_2.32_kernel_bootstrap.md) | `kernel/kernel.go` | 25 min |
 | 2.33 | [micro_2.33_kernel_lifecycle.md](micro_2.33_kernel_lifecycle.md) | `kernel/lifecycle/lifecycle.go` | 15 min |
 | 2.34 | [micro_2.34_kernel_test.md](micro_2.34_kernel_test.md) | `kernel/kernel_test.go` | 25 min |
-| 2.35 | [micro_2.35_verify.md](micro_2.35_verify.md) | — (verification only) | 15 min |
+
+### Production Hardening (5 tasks)
+| # | File | Target | Thời gian |
+|---|---|---|---|
+| 2.36 | [micro_2.36_resilience.md](micro_2.36_resilience.md) | `kernel/resilience/` | 25 min |
+| 2.37 | [micro_2.37_metrics.md](micro_2.37_metrics.md) | `kernel/metrics/metrics.go` | 20 min |
+| 2.38 | [micro_2.38_dead_letter_queue.md](micro_2.38_dead_letter_queue.md) | `kernel/eventbus/dlq.go` | 20 min |
+| 2.39 | [micro_2.39_config_watcher.md](micro_2.39_config_watcher.md) | `kernel/config/watcher.go` | 20 min |
+| 2.40 | [micro_2.40_resilience_cleanup_enhancements.md](micro_2.40_resilience_cleanup_enhancements.md) | `kernel/runtime/` | 20 min |
+
+### Final Verification (1 task)
+| # | File | Target | Thời gian |
+|---|---|---|---|
+| 2.41 | [micro_2.35_verify.md](micro_2.35_verify.md) | — (verification only) | 15 min |
 
 ---
 
@@ -130,8 +143,10 @@ graph TD
 | Registry | 4 | 85 min |
 | Runtime | 5 | 105 min |
 | Scheduler | 4 | 85 min |
-| Kernel Bootstrap | 5 | 95 min |
-| **Tổng** | **35** | **~10.9 giờ** |
+| Kernel Bootstrap | 4 | 80 min |
+| Production Hardening | 5 | 105 min |
+| Verification | 1 | 15 min |
+| **Tổng** | **40** | **~12.6 giờ** |
 
 ## Cách sử dụng
 

@@ -1,8 +1,8 @@
-# Micro-Task 2.35: Phase 2 Verification — Build & Test All Kernel Code
+# Micro-Task 2.41: Phase 2 Verification — Build & Test All Kernel Code
 
 ## Info
 - **File created**: None (verification only)
-- **Depends on**: ALL micro-tasks 2.01 → 2.34
+- **Depends on**: ALL micro-tasks 2.01 → 2.40
 - **Time**: 15 min
 - **Purpose**: Ensure ALL kernel code compiles, passes tests, and has no race conditions
 
@@ -10,12 +10,13 @@
 
 ### Step 1: Check all files exist
 ```bash
-# Config (5 files)
+# Config (6 files)
 ls kernel/config/config.go
 ls kernel/config/defaults.go
 ls kernel/config/env.go
 ls kernel/config/loader.go
 ls kernel/config/validator.go
+ls kernel/config/watcher.go
 ls kernel/config/config_test.go
 
 # Logger (5 files)
@@ -25,12 +26,13 @@ ls kernel/logger/formatter.go
 ls kernel/logger/redact.go
 ls kernel/logger/logger_test.go
 
-# EventBus (6 files)
+# EventBus (7 files)
 ls kernel/eventbus/types.go
 ls kernel/eventbus/matcher.go
 ls kernel/eventbus/subscriber.go
 ls kernel/eventbus/bus.go
 ls kernel/eventbus/helpers.go
+ls kernel/eventbus/dlq.go
 ls kernel/eventbus/bus_test.go
 
 # Registry (4 files)
@@ -51,6 +53,13 @@ ls kernel/scheduler/queue.go
 ls kernel/scheduler/deps.go
 ls kernel/scheduler/scheduler.go
 ls kernel/scheduler/scheduler_test.go
+
+# Resilience (2 files)
+ls kernel/resilience/retry.go
+ls kernel/resilience/circuitbreaker.go
+
+# Metrics (1 file)
+ls kernel/metrics/metrics.go
 
 # Kernel (4 files)
 ls kernel/state.go
@@ -145,15 +154,17 @@ go build ./kernel/...
 ### Step 11: Git commit
 ```bash
 git add -A
-git commit -m "Phase 2: Kernel core implementation (35 micro-tasks)
+git commit -m "Phase 2: Kernel core implementation (40 micro-tasks)
 
 Components:
-- Config: YAML loading, env var resolution, validation
+- Config: YAML loading, env var resolution, validation, watcher (hot-reload)
 - Logger: slog-based structured logging with redaction
-- EventBus: async pub/sub with wildcard matching
+- EventBus: async pub/sub with wildcard matching and DLQ (dead letter queue)
 - Registry: thread-safe plugin management with lifecycle
-- Runtime: task execution with worker pool and panic recovery
+- Runtime: task execution with worker pool, fallback execution, and leak checks
 - Scheduler: priority queue with dependency tracking
+- Resilience: retry policy and circuit breaker
+- Metrics: in-memory observability collector
 
 All tests pass with race detector. Coverage >= 75%."
 
@@ -164,19 +175,21 @@ git push origin main
 
 | Package | Source Files | Test Files | Total |
 |---|---|---|---|
-| kernel/config | 5 | 1 | 6 |
+| kernel/config | 6 | 1 | 7 |
 | kernel/logger | 4 | 1 | 5 |
-| kernel/eventbus | 5 | 1 | 6 |
+| kernel/eventbus | 6 | 1 | 7 |
 | kernel/registry | 3 | 1 | 4 |
 | kernel/runtime | 4 | 1 | 5 |
 | kernel/scheduler | 3 | 1 | 4 |
+| kernel/resilience | 2 | 0 | 2 |
+| kernel/metrics | 1 | 0 | 1 |
 | kernel | 2 | 1 | 3 |
 | kernel/lifecycle | 1 | 0 | 1 |
-| **Total** | **27** | **7** | **34** |
+| **Total** | **32** | **7** | **39** |
 
 ## Quality Gates (ALL must pass)
 
-- [ ] All 34 files exist
+- [ ] All 39 files exist
 - [ ] `go build ./kernel/...` ✅
 - [ ] `go vet ./kernel/...` ✅
 - [ ] `go test ./kernel/...` ALL PASS
