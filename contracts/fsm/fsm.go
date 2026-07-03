@@ -20,6 +20,11 @@ var (
 // State represents a named state in a state machine.
 type State string
 
+const (
+	// StateCompleted represents a completed state.
+	StateCompleted State = "completed"
+)
+
 // TransitionRecord is an immutable record of a state transition.
 type TransitionRecord struct {
 	EntityType string    `json:"entity_type"`

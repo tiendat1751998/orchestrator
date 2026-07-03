@@ -213,6 +213,7 @@ System redesigned to support a **10-year stable lifecycle** with a **57-RFC cata
 - [x] Micro-Task 5.05: Create kernel/planner/replanner.go (Implemented dynamic replanning on task failures)
 - [x] Micro-Task 5.06: Create kernel/planner/explain.go (Implemented contrastive mathematical reasoning report detailing why the plan was chosen)
 - [x] Micro-Task 5.07: Create kernel/planner/planner_test.go (Implemented comprehensive unit tests for CSPSolver_Filter and Scorer_ParetoAndUCB)
+- [x] Micro-Task 5.08: Create kernel/orchestrator/orchestrator.go (Implemented the core FSM lifecycle coordinator, workspace transactions, candidate planning, and Pareto selection)
 
 ## Platform Availability
 - `antigravity-ide`: ✓ (current session)
