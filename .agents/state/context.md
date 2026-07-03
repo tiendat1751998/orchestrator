@@ -183,7 +183,9 @@ System redesigned to support a **10-year stable lifecycle** with a **57-RFC cata
 - [x] Micro-Task 4.11: Create plugins/providers/antigravity/session/manager.go (Implements the session connection pool to manage multiple concurrent Antigravity CLI processes and clean up inactive sessions)
 - [x] Micro-Task 4.12: Create plugins/providers/antigravity/session/heartbeat.go (Implements connection health checks for running CLI processes and automatic restarts)
 - [x] Micro-Task 4.13: Create plugins/providers/antigravity/prompt/builder.go (Implements request formatting to convert Request payloads into text prompts for the CLI)
-
+- [x] Micro-Task 4.14: Create plugins/providers/antigravity/provider.go (Implements the main Antigravity provider CLI process runner and session coordinator)
+- [x] Micro-Task 4.15: Create plugins/providers/antigravity/provider_gemini.go (Implements the native Gemini API fallback driver to communicate directly with Google's Gemini REST API endpoints)
+- [x] Micro-Task 4.16: Create plugins/providers/antigravity/provider_test.go (Implements integration unit tests for the Antigravity and Gemini provider drivers, verifying process calls, parsers, and connection sessions)
 
 ## Platform Availability
 - `antigravity-ide`: ✓ (current session)

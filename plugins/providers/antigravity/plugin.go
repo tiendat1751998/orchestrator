@@ -6,19 +6,13 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"time"
 
 	cplugin "github.com/tiendat1751998/orchestrator/contracts/plugin"
 	cprovider "github.com/tiendat1751998/orchestrator/contracts/provider"
+	"github.com/tiendat1751998/orchestrator/plugins/providers/antigravity/session"
 	sdkprovider "github.com/tiendat1751998/orchestrator/sdk/provider"
 )
-
-// AntigravityProvider adapts the Antigravity CLI model runner into a contracts-compliant provider.
-type AntigravityProvider struct {
-	*sdkprovider.BaseProvider
-
-	logger *slog.Logger
-	binary string
-}
 
 // NewAntigravityProvider constructs a new AntigravityProvider instance.
 func NewAntigravityProvider(cfg *cprovider.Config, logger *slog.Logger) (*AntigravityProvider, error) {
@@ -40,10 +34,14 @@ func NewAntigravityProvider(cfg *cprovider.Config, logger *slog.Logger) (*Antigr
 		binaryPath = "antigravity" // Fallback default path search
 	}
 
+	// 5 maximum concurrent CLI processes, 5 minutes idle timeout
+	sm := session.NewSessionManager(binaryPath, 5, 5*time.Minute)
+
 	return &AntigravityProvider{
 		BaseProvider: baseProvider,
 		logger:       logger,
 		binary:       binaryPath,
+		sm:           sm,
 	}, nil
 }
 
@@ -74,6 +72,11 @@ func (p *AntigravityProvider) Start(ctx context.Context) error {
 
 // Stop implements contracts/plugin.Plugin interface.
 func (p *AntigravityProvider) Stop(ctx context.Context) error {
+	var stopErr error
+	if p.sm != nil {
+		stopErr = p.sm.Stop()
+	}
+
 	if err := p.BaseProvider.Stop(ctx); err != nil {
 		return err
 	}
@@ -81,7 +84,7 @@ func (p *AntigravityProvider) Stop(ctx context.Context) error {
 	if p.logger != nil {
 		p.logger.Info("antigravity provider stopped")
 	}
-	return nil
+	return stopErr
 }
 
 // Health implements contracts/plugin.Plugin interface.
