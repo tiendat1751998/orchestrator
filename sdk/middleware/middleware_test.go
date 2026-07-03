@@ -82,9 +82,9 @@ func TestProviderMiddleware_Retry(t *testing.T) {
 	}
 
 	retryCfg := resilience.RetryConfig{
-		MaxAttempts: 3,
-		InitialWait: 1 * time.Millisecond,
-		Jitter:      false,
+		MaxAttempts:  3,
+		InitialDelay: 1 * time.Millisecond,
+		Jitter:       false,
 	}
 
 	retriedProvider := middleware.ChainProvider(mp, middleware.ProviderRetry(retryCfg))

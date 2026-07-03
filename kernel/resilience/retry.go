@@ -2,65 +2,129 @@ package resilience
 
 import (
 	"context"
-	"crypto/rand"
-	"math/big"
+	"errors"
+	"fmt"
+	"math/rand"
+	"net"
 	"time"
 
 	"github.com/tiendat1751998/orchestrator/contracts"
 )
 
-// RetryConfig configures the retry policy.
+// RetryConfig configures retry policies.
 type RetryConfig struct {
-	MaxAttempts int           // Maximum number of retry attempts (default: 3)
-	InitialWait time.Duration // Initial delay duration (default: 1s)
-	MaxWait     time.Duration // Maximum delay ceiling (default: 30s)
-	Multiplier  float64       // Exponential growth multiplier (default: 2.0)
-	Jitter      bool          // Enable randomized delay to prevent thundering herd (default: true)
+	MaxAttempts  int
+	InitialDelay time.Duration
+	MaxDelay     time.Duration
+	Multiplier   float64
+	Jitter       bool
 }
 
-// DefaultRetryConfig returns a pre-configured config.
+// DefaultRetryConfig returns a standard retry configuration.
 func DefaultRetryConfig() RetryConfig {
 	return RetryConfig{
-		MaxAttempts: 3,
-		InitialWait: 1 * time.Second,
-		MaxWait:     30 * time.Second,
-		Multiplier:  2.0,
-		Jitter:      true,
+		MaxAttempts:  3,
+		InitialDelay: 100 * time.Millisecond,
+		MaxDelay:     2 * time.Second,
+		Multiplier:   2.0,
+		Jitter:       true,
 	}
 }
 
-// Retry executes a function. If it fails, retries it under the backoff policy.
-// Only retries if the error satisfies contracts.IsRetryable(err).
+// Retry executes the target function in a retry loop using exponential backoff.
 func Retry(ctx context.Context, cfg RetryConfig, fn func() error) error {
-	_, err := RetryWithResult(ctx, cfg, func() (any, error) {
-		return nil, fn()
-	})
-	return err
+	var lastErr error
+
+	for attempt := 0; attempt < cfg.MaxAttempts; attempt++ {
+		if err := ctx.Err(); err != nil {
+			return err
+		}
+
+		err := fn()
+		if err == nil {
+			return nil // Success
+		}
+
+		lastErr = err
+
+		// 1. Terminate early if error is not retryable
+		if !IsRetryable(err) {
+			return err
+		}
+
+		if attempt == cfg.MaxAttempts-1 {
+			break
+		}
+
+		// 2. Compute backoff delay
+		delay := calculateDelay(attempt, cfg)
+
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		case <-time.After(delay):
+		}
+	}
+
+	return fmt.Errorf("retry: max attempts reached (%d). last error: %w", cfg.MaxAttempts, lastErr)
 }
 
-// RetryWithResult executes a function returning a result, with retry logic.
+// IsRetryable determines if an error is transient and can be retried.
+func IsRetryable(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	// 1. Standard contracts sentinels
+	if errors.Is(err, contracts.ErrProviderTimeout) ||
+		errors.Is(err, contracts.ErrProviderRateLimited) ||
+		errors.Is(err, contracts.ErrProviderUnavailable) {
+		return true
+	}
+
+	// 2. Network connection or timeout errors
+	var netErr net.Error
+	if errors.As(err, &netErr) {
+		return true
+	}
+
+	// 3. Explicitly retryable error contract
+	if contracts.IsRetryable(err) {
+		return true
+	}
+
+	return false
+}
+
+func calculateDelay(attempt int, cfg RetryConfig) time.Duration {
+	temp := float64(cfg.InitialDelay)
+	for i := 0; i < attempt; i++ {
+		temp *= cfg.Multiplier
+		if temp >= float64(cfg.MaxDelay) {
+			temp = float64(cfg.MaxDelay)
+			break
+		}
+	}
+
+	delay := time.Duration(temp)
+
+	if cfg.Jitter {
+		// Apply ±20% randomized jitter
+		jitterFactor := 0.8 + rand.Float64()*0.4
+		delay = time.Duration(float64(delay) * jitterFactor)
+	}
+
+	return delay
+}
+
+// RetryWithResult executes a result-returning function in a retry loop using exponential backoff.
+// Used by provider middlewares where the function returns (*Response, error).
 func RetryWithResult[T any](ctx context.Context, cfg RetryConfig, fn func() (T, error)) (T, error) {
-	// Apply defaults if values are zero
-	if cfg.MaxAttempts <= 0 {
-		cfg.MaxAttempts = 3
-	}
-	if cfg.InitialWait <= 0 {
-		cfg.InitialWait = 1 * time.Second
-	}
-	if cfg.MaxWait <= 0 {
-		cfg.MaxWait = 30 * time.Second
-	}
-	if cfg.Multiplier <= 0 {
-		cfg.Multiplier = 2.0
-	}
-
+	var zero T
 	var lastErr error
-	delay := cfg.InitialWait
 
-	for attempt := 1; attempt <= cfg.MaxAttempts; attempt++ {
-		// Check context cancellation before executing
+	for attempt := 0; attempt < cfg.MaxAttempts; attempt++ {
 		if err := ctx.Err(); err != nil {
-			var zero T
 			return zero, err
 		}
 
@@ -71,52 +135,22 @@ func RetryWithResult[T any](ctx context.Context, cfg RetryConfig, fn func() (T, 
 
 		lastErr = err
 
-		// Stop retrying if context is cancelled or the error is NOT retryable
-		if !contracts.IsRetryable(err) || attempt == cfg.MaxAttempts {
-			var zero T
-			return zero, lastErr
+		if !IsRetryable(err) {
+			return zero, err
 		}
 
-		// Calculate next delay
-		actualDelay := delay
-		if cfg.Jitter {
-			actualDelay = applyJitter(delay)
+		if attempt == cfg.MaxAttempts-1 {
+			break
 		}
 
-		// Sleep or context cancellation wait
+		delay := calculateDelay(attempt, cfg)
+
 		select {
 		case <-ctx.Done():
-			var zero T
 			return zero, ctx.Err()
-		case <-time.After(actualDelay):
-		}
-
-		// Increase delay exponentially for next iteration
-		nextDelay := float64(delay) * cfg.Multiplier
-		if nextDelay > float64(cfg.MaxWait) {
-			delay = cfg.MaxWait
-		} else {
-			delay = time.Duration(nextDelay)
+		case <-time.After(delay):
 		}
 	}
 
-	var zero T
-	return zero, lastErr
-}
-
-// applyJitter adds random noise (±25%) to the backoff delay to prevent thundering herd.
-func applyJitter(d time.Duration) time.Duration {
-	jitterRange := d / 4
-	if jitterRange <= 0 {
-		return d
-	}
-
-	n, err := rand.Int(rand.Reader, big.NewInt(int64(jitterRange*2)))
-	var randVal int64
-	if err == nil {
-		randVal = n.Int64()
-	}
-
-	offset := randVal - int64(jitterRange)
-	return d + time.Duration(offset)
+	return zero, fmt.Errorf("retry: max attempts reached (%d). last error: %w", cfg.MaxAttempts, lastErr)
 }

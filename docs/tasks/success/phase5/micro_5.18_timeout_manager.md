@@ -71,9 +71,9 @@ go build ./kernel/resilience/...
 ```
 
 ## Checklist
-- [ ] File exists at `kernel/resilience/timeout.go`
-- [ ] Package name is `resilience`
-- [ ] All exported types have Godoc
-- [ ] Cascading timeouts are derived correctly
-- [ ] Cancel callbacks are returned along with contexts
-- [ ] Build command passes
+- [x] File exists at `kernel/resilience/timeout.go`
+- [x] Package name is `resilience`
+- [x] All exported types have Godoc
+- [x] Cascading timeouts are derived correctly
+- [x] Cancel callbacks are returned along with contexts
+- [x] Build command passes

@@ -218,6 +218,12 @@ System redesigned to support a **10-year stable lifecycle** with a **57-RFC cata
 - [x] Micro-Task 5.10: Create kernel/orchestrator/pipeline.go (Implemented the execution pipeline state machine and thread-safe transition verification)
 - [x] Micro-Task 5.11: Create kernel/orchestrator/supervisor.go (Implemented the background monitoring supervisor daemon and health checkers to detect stale tasks)
 - [x] Micro-Task 5.12: Create kernel/orchestrator/aggregator.go (Implemented the result aggregator to compile task execution durations, status keys, and resource usages)
+- [x] Micro-Task 5.13: Create kernel/orchestrator/feedback.go (Implemented thread-safe `FeedbackCollector` tracking task speed, token usage, and success/failure counts per agent)
+- [x] Micro-Task 5.14: Create kernel/orchestrator/orchestrator_test.go (Implemented comprehensive unit tests covering pipeline transitions, supervisor timeouts, coordinator injection, feedback records, and orchestrator execution)
+- [x] Micro-Task 5.15: Create kernel/resilience/circuit_breaker.go (Implemented core `CircuitBreaker` with tri-state transitions, mutex locks, and `halfOpenInFlight` tracking)
+- [x] Micro-Task 5.16: Create kernel/resilience/retry.go (Implemented retries scheduler with exponential backoff configuration and randomized delay jittering)
+- [x] Micro-Task 5.17: Create kernel/resilience/fallback.go (Implemented fallback resilience selector and backup routines)
+- [x] Micro-Task 5.18: Create kernel/resilience/timeout.go (Implemented cascading timeout budget allocations context derivation)
 
 ## Platform Availability
 - `antigravity-ide`: ✓ (current session)

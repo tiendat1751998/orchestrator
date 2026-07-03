@@ -127,10 +127,10 @@ func TestProviderRetry(t *testing.T) {
 	}
 
 	cfg := resilience.RetryConfig{
-		MaxAttempts: 3,
-		InitialWait: 1 * time.Millisecond,
-		Multiplier:  1.0,
-		Jitter:      false,
+		MaxAttempts:  3,
+		InitialDelay: 1 * time.Millisecond,
+		Multiplier:   1.0,
+		Jitter:       false,
 	}
 
 	mw := ProviderRetry(cfg)
@@ -157,10 +157,7 @@ func TestProviderCircuitBreaker(t *testing.T) {
 		},
 	}
 
-	cb := resilience.NewCircuitBreaker(resilience.CBConfig{
-		MaxFailures: 2,
-		Cooldown:    10 * time.Second,
-	})
+	cb := resilience.NewCircuitBreaker(2, 10*time.Second)
 
 	mw := ProviderCircuitBreaker(cb)
 	wrapped := mw(mock)
@@ -182,8 +179,8 @@ func TestProviderCircuitBreaker(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected error")
 	}
-	if cb.State() != resilience.StateOpen {
-		t.Errorf("expected breaker to be Open, got: %s", cb.State())
+	if cb.GetState() != resilience.StateOpen {
+		t.Errorf("expected breaker to be Open, got: %v", cb.GetState())
 	}
 }
 
