@@ -1,0 +1,8 @@
+name: "antigravity"
+type: "provider"
+version: "0.1.0"
+description: "Antigravity CLI provider (Gemini backend)"
+config:
+  binary: "antigravity"
+  model: "gemini-2.5-pro"
+  timeout: "120s"
