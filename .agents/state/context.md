@@ -176,6 +176,13 @@ System redesigned to support a **10-year stable lifecycle** with a **57-RFC cata
 - [x] Micro-Task 4.04: Create plugins/providers/antigravity/adapter/stdin.go (Implements the safe standard input pipe writer helper to handle writing prompts to the CLI adapter process)
 - [x] Micro-Task 4.05: Create plugins/providers/antigravity/adapter/stdout.go (Implements the standard output reader helper that reads response payloads from the CLI stdout pipe)
 - [x] Micro-Task 4.06: Create plugins/providers/antigravity/adapter/stderr.go (Implements the standard error pipe reader helper to drain and log CLI process stderr messages in the background)
+- [x] Micro-Task 4.07: Create plugins/providers/antigravity/parser/markdown.go (Implements markdown parsing and code block extraction helpers to process raw CLI outputs)
+- [x] Micro-Task 4.08: Create plugins/providers/antigravity/parser/toolcall.go (Implements tool call parsing and extraction helpers for AI-generated CLI outputs)
+- [x] Micro-Task 4.09: Create plugins/providers/antigravity/parser/json.go (Implements robust JSON parsing and markdown fence stripping helpers)
+- [x] Micro-Task 4.10: Create plugins/providers/antigravity/parser/error.go (Implements CLI error normalizer mapping raw error log and diagnostics warnings to standard contracts error sentinels)
+- [x] Micro-Task 4.11: Create plugins/providers/antigravity/session/manager.go (Implements the session connection pool to manage multiple concurrent Antigravity CLI processes and clean up inactive sessions)
+- [x] Micro-Task 4.12: Create plugins/providers/antigravity/session/heartbeat.go (Implements connection health checks for running CLI processes and automatic restarts)
+- [x] Micro-Task 4.13: Create plugins/providers/antigravity/prompt/builder.go (Implements request formatting to convert Request payloads into text prompts for the CLI)
 
 
 ## Platform Availability
