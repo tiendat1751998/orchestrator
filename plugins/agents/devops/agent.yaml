@@ -1,0 +1,21 @@
+name: "devops"
+version: "0.1.0"
+role: "DevOps Engineer"
+description: "Manages deployment processes, CI/CD configurations, environments, and documentation"
+capabilities:
+  - "deployment"
+  - "documentation"
+provider: "antigravity"
+model: "gemini-3.5-pro"
+tools:
+  - "read_file"
+  - "write_file"
+  - "list_dir"
+  - "git_status"
+  - "git_diff"
+  - "git_add"
+  - "git_commit"
+  - "run_command"
+prompt_file: "prompts/system.md"
+temperature: 0.2
+max_tokens: 8192

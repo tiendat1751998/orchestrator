@@ -1,0 +1,24 @@
+name: "backend"
+version: "0.1.0"
+role: "Backend Developer"
+description: "Generates backend code, APIs, database schemas, and unit tests"
+capabilities:
+  - "code_generation"
+  - "testing"
+  - "debugging"
+  - "refactoring"
+provider: "antigravity"
+model: "gemini-3.5-pro"
+tools:
+  - "read_file"
+  - "write_file"
+  - "list_dir"
+  - "search"
+  - "git_status"
+  - "git_diff"
+  - "git_add"
+  - "git_commit"
+  - "run_command"
+prompt_file: "prompts/system.md"
+temperature: 0.3
+max_tokens: 8192

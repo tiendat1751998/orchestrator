@@ -193,6 +193,19 @@ System redesigned to support a **10-year stable lifecycle** with a **57-RFC cata
 - [x] Micro-Task 4.21: Create plugins/tools/git/git.go (Implements git client commands stage, commit, diff, status, log wrappers)
 - [x] Micro-Task 4.22: Create plugins/tools/terminal/terminal.go (Implements terminal commands runner wrapper with security blocklists and timeouts)
 - [x] Micro-Task 4.23: Create plugins/tools/tools_test.go (Implements integration unit tests for core tools)
+- [x] Micro-Task 4.24: Create plugins/agents/backend/agent.yaml (Declares the capability and tool configurations for the Backend Developer Agent)
+- [x] Micro-Task 4.25: Create plugins/agents/backend/prompts/system.md (Specifies the system instruction guidelines for the Backend Developer Agent)
+- [x] Micro-Task 4.26: Create plugins/agents/backend/agent.go (Implements the backend developer agent class wrapper, loading manifest configurations and embedding the SDK's BaseAgent structures)
+- [x] Micro-Task 4.27: Create plugins/agents/devops/agent.yaml (Declares the capabilities and tools configuration settings for the DevOps Engineer Agent)
+- [x] Micro-Task 4.28: Create plugins/agents/devops/prompts/system.md (Declares system prompts containing DevOps specific instructions and rules of behavior)
+- [x] Micro-Task 4.29: Create plugins/agents/devops/agent.go (Implements the DevOps Developer agent package constructor, loading YAML configurations and wrapping the SDK BaseAgent)
+- [x] Micro-Task 4.30: Create plugins/agents/reviewer/agent.yaml (Declares the capabilities and tools configuration settings for the Code Reviewer Agent)
+- [x] Micro-Task 4.31: Create plugins/agents/reviewer/prompts/system.md (Declares the system instructions configuration file for the Code Reviewer Agent)
+- [x] Micro-Task 4.32: Create plugins/agents/reviewer/agent.go (Implements the Code Reviewer agent package constructor, loading YAML configurations and wrapping the SDK BaseAgent)
+- [x] Micro-Task 4.33: Create plugins/agents/agent_test.go (Implements integration unit tests for the core agents system, verifying that agent manifests are loaded, ReAct loops execute, and tasks are delegated to providers and tools successfully)
+
+
+
 
 ## Platform Availability
 - `antigravity-ide`: ✓ (current session)

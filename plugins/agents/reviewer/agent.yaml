@@ -1,0 +1,19 @@
+name: "reviewer"
+version: "0.1.0"
+role: "Code Reviewer"
+description: "Reviews source code modifications, verifies tests, audits security, and asserts standards"
+capabilities:
+  - "code_review"
+  - "testing"
+provider: "antigravity"
+model: "gemini-3.5-pro"
+tools:
+  - "read_file"
+  - "list_dir"
+  - "search"
+  - "git_status"
+  - "git_diff"
+  - "git_log"
+prompt_file: "prompts/system.md"
+temperature: 0.1
+max_tokens: 8192
