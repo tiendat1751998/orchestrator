@@ -1,7 +1,7 @@
 # Session State
 
 ## Current Phase
-Phase 1: Contracts & Foundation (all architectural specifications and micro-tasks have been aligned).
+Phase 4: Provider & Agent Plugins Catalog (Currently implementing Antigravity provider CLI adapter, core filesystem/terminal/git tools, and core developer agents).
 
 ## Architecture Evolution
 System redesigned to support a **10-year stable lifecycle** with a **57-RFC catalog**:
@@ -137,6 +137,37 @@ System redesigned to support a **10-year stable lifecycle** with a **57-RFC cata
 - [x] Micro-Task 2.36: Create kernel/resilience (Implemented Retry and CircuitBreaker resilience patterns with comprehensive unit testing)
 - [x] Micro-Task 2.37: Create kernel/metrics (Telemetry Metrics & Observability) (Implemented thread-safe Counter, Gauge, Histogram, Registry, and taking snapshots under heavy load)
 - [x] Micro-Task 2.38: Create kernel/eventbus/dlq.go (Dead Letter Queue) (Implemented thread-safe circular DLQ ring buffer, recovery panics logging, and Bus integration)
+- [x] Micro-Task 2.39: Create kernel/config/watcher.go (Config Hot-Reload) (Implemented polling-based config change watcher, safe auto-reloading of valid changes, and error resilience)
+- [x] Micro-Task 2.40: Update Executor and Runtime (Graceful Degradation & Leak Detection) (Implemented sequential fallback agent routing, and active worker/undrained channel leak detection)
+- [x] Micro-Task 2.35: Phase 2 Verification — Build & Test All Kernel Code (Successfully verified 100% build and tests on all kernel packages, with zero errors)
+
+### Completed Phase 3 Tasks
+- [x] Micro-Task 3.01: Create sdk/plugin/plugin.go (Implemented thread-safe BasePlugin helper and lifecycle test suite)
+- [x] Micro-Task 3.02: Create sdk/agent/manifest.go (Implemented manifest loader and validators for agent configurations)
+- [x] Micro-Task 3.03: Create sdk/agent/prompt.go (Implemented agent prompt builder converting tasks and context into formatted messages)
+- [x] Micro-Task 3.04: Create sdk/agent/agent.go (Implemented BaseAgent runner loop with parallel tool executions, error recovery, and ReAct loop iteration guards)
+- [x] Micro-Task 3.05: Create sdk/agent/agent_test.go (Implemented tests for manifest loading and agent execution loops)
+- [x] Micro-Task 3.06: Create sdk/provider/provider.go (Implemented BaseProvider helper with thread-safe model management)
+- [x] Micro-Task 3.07: Create sdk/provider/request.go (Implemented RequestBuilder fluent immutable request constructor with deep copies)
+- [x] Micro-Task 3.08: Create sdk/provider/stream.go (Implemented Stream collection, aggregation, and tool call merging)
+- [x] Micro-Task 3.09: Create sdk/provider/provider_test.go (Implemented and ran unit tests for RequestBuilder immutability, validation, success, and stream collector integrations)
+- [x] Micro-Task 3.10: Create sdk/tool/tool.go (Implemented BaseTool with parameter validation engine against JSON Schema)
+- [x] Micro-Task 3.11: Create sdk/tool/result.go (Implemented tool result builders Success, Failure, WithExitCode, and JSON serializations)
+- [x] Micro-Task 3.12: Create sdk/tool/tool_test.go (Implemented and ran unit tests for BaseTool schema validations, argument bounds, and result builder helpers)
+- [x] Micro-Task 3.13: Create sdk/workflow/workflow.go (Implemented BaseWorkflow, Kahn's topological sort, duplicate validations, copy protection, and unit tests)
+- [x] Micro-Task 3.14: Create sdk/context/builder.go (Implemented EstimateTokens and TruncateItems stable sort by priority, budget truncation, no mutation of input slice, and unit tests)
+- [x] Micro-Task 3.15: Create sdk/memory/memory.go (Implemented InMemoryStore thread-safe memory with JSON byte serialization, TTLs, prefix listing, scoring search, and unit tests)
+- [x] Micro-Task 3.16: Create sdk/search/search.go (Implemented InMemorySearchEngine conforming to contracts/search.Engine, supporting text searching, metadata queries, and relevance score rankings, with unit tests)
+- [x] Micro-Task 3.17: Create sdk/task/task.go (Implemented TaskBuilder fluent immutable task constructor with deep copies, default priorities/timeouts, and unit tests)
+- [x] Micro-Task 3.18: Create sdk/testing/mocks.go (Implemented standard mock structures for core components supporting integration and unit tests with customizable overrides and safe concurrent event logging)
+- [x] Micro-Task 3.19: Create sdk/testing/mocks_test.go (Implemented and ran unit tests for MockProvider, MockAgent, MockTool, and MockEventBus concurrent operations)
+- [x] Micro-Task 3.20: Create sdk/middleware/agent.go (Implemented agent decorators ChainAgent, AgentLogging, AgentMetrics, and AgentPanicRecovery)
+- [x] Micro-Task 3.21: Create sdk/middleware/provider.go (Implemented provider decorators ChainProvider, ProviderLogging, ProviderRetry, ProviderCircuitBreaker, and ProviderMetrics)
+- [x] Micro-Task 3.22: Create sdk/helpers/ratelimit.go (Implemented thread-safe token bucket rate limiter with clock drift handling and unit tests)
+- [x] Micro-Task 3.23: Create sdk/middleware/middleware_test.go (Implemented integration unit tests for Agent & Provider Middlewares and Rate Limiter)
+- [x] Micro-Task 3.24: Create sdk/workflow/state.go (Implemented thread-safe runtime state resolver with template recursion and nested property lookups)
+- [x] Micro-Task 3.25: Create sdk/workflow/workflow_test.go (Implemented integration unit tests for Workflow SDK)
+- [x] Micro-Task 3.26: Verification — Complete Phase 3 Build & Test (All quality gates passed, 100% build and unit test success across SDK)
 
 
 ## Platform Availability

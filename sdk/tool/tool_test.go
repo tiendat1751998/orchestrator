@@ -1,0 +1,170 @@
+package tool_test
+
+import (
+	"context"
+	"encoding/json"
+	"testing"
+
+	contractstool "github.com/tiendat1751998/orchestrator/contracts/tool"
+	sdktool "github.com/tiendat1751998/orchestrator/sdk/tool"
+)
+
+// =============================================================================
+// Helper Mock Tool for testing execution
+// =============================================================================
+
+type concreteTestTool struct {
+	*sdktool.BaseTool
+}
+
+func (t *concreteTestTool) Execute(ctx context.Context, args json.RawMessage) (*contractstool.Result, error) {
+	if err := t.ValidateArguments(args); err != nil {
+		return sdktool.Failure(err.Error()), nil
+	}
+	return sdktool.Success("test success"), nil
+}
+
+// =============================================================================
+// Argument Validation Tests
+// =============================================================================
+
+func TestBaseTool_ValidateArguments_Required(t *testing.T) {
+	schema := contractstool.NewSchema().
+		AddProperty("path", contractstool.StringProperty("File path")).
+		AddProperty("lines", contractstool.IntProperty("Lines count")).
+		AddRequired("path")
+
+	toolInst, _ := sdktool.NewBaseTool("test_tool", "Description", schema)
+
+	// Case 1: Missing required field
+	err := toolInst.ValidateArguments(json.RawMessage(`{"lines": 10}`))
+	if err == nil {
+		t.Error("expected error due to missing required field 'path'")
+	}
+
+	// Case 2: Present required field
+	err = toolInst.ValidateArguments(json.RawMessage(`{"path": "main.go", "lines": 5}`))
+	if err != nil {
+		t.Errorf("unexpected validation error: %v", err)
+	}
+
+	// Case 3: Empty arguments when fields are required
+	err = toolInst.ValidateArguments(json.RawMessage(`{}`))
+	if err == nil {
+		t.Error("expected error on empty args when fields are required")
+	}
+}
+
+func TestBaseTool_ValidateArguments_Types(t *testing.T) {
+	schema := contractstool.NewSchema().
+		AddProperty("str_val", contractstool.StringProperty("string")).
+		AddProperty("int_val", contractstool.IntProperty("integer")).
+		AddProperty("bool_val", contractstool.BoolProperty("boolean"))
+
+	toolInst, _ := sdktool.NewBaseTool("test_tool", "Description", schema)
+
+	// Case 1: Type mismatch (string as boolean)
+	err := toolInst.ValidateArguments(json.RawMessage(`{"bool_val": "true"}`))
+	if err == nil {
+		t.Error("expected error when passing string as boolean")
+	}
+
+	// Case 2: Type mismatch (float as integer)
+	err = toolInst.ValidateArguments(json.RawMessage(`{"int_val": 12.34}`))
+	if err == nil {
+		t.Error("expected error when passing decimal float as integer")
+	}
+
+	// Case 3: Correct integer (whole number float)
+	err = toolInst.ValidateArguments(json.RawMessage(`{"int_val": 42}`))
+	if err != nil {
+		t.Errorf("unexpected error on valid integer: %v", err)
+	}
+}
+
+func TestBaseTool_ValidateArguments_Enum(t *testing.T) {
+	schema := contractstool.NewSchema().
+		AddProperty("format", contractstool.EnumProperty("Output format", "json", "yaml"))
+
+	toolInst, _ := sdktool.NewBaseTool("test_tool", "Description", schema)
+
+	// Case 1: Value inside enum
+	err := toolInst.ValidateArguments(json.RawMessage(`{"format": "yaml"}`))
+	if err != nil {
+		t.Errorf("unexpected error on valid enum value: %v", err)
+	}
+
+	// Case 2: Value outside enum
+	err = toolInst.ValidateArguments(json.RawMessage(`{"format": "toml"}`))
+	if err == nil {
+		t.Error("expected error for value outside enum")
+	}
+}
+
+func TestBaseTool_ValidateArguments_InvalidJSON(t *testing.T) {
+	schema := contractstool.NewSchema().
+		AddProperty("path", contractstool.StringProperty("path"))
+
+	toolInst, _ := sdktool.NewBaseTool("test_tool", "Description", schema)
+
+	err := toolInst.ValidateArguments(json.RawMessage(`{"path": "unclosed`))
+	if err == nil {
+		t.Error("expected error on malformed JSON input")
+	}
+}
+
+// =============================================================================
+// Result Builder Tests
+// =============================================================================
+
+func TestResultBuilders(t *testing.T) {
+	res := sdktool.Success("ok")
+	if res.ExitCode != 0 || res.Output != "ok" || res.Error != "" {
+		t.Errorf("Success: %v", res)
+	}
+
+	res = sdktool.Failure("error message")
+	if res.ExitCode != 1 || res.Error != "error message" || res.Output != "" {
+		t.Errorf("Failure: %v", res)
+	}
+
+	res = sdktool.WithExitCode("output", "err", 2)
+	if res.ExitCode != 2 || res.Output != "output" || res.Error != "err" {
+		t.Errorf("WithExitCode: %v", res)
+	}
+}
+
+func TestResultJSON(t *testing.T) {
+	type dummy struct {
+		Name  string `json:"name"`
+		Value int    `json:"value"`
+	}
+
+	data := dummy{Name: "test", Value: 42}
+	res, err := sdktool.JSON(data)
+	if err != nil {
+		t.Fatalf("JSON serialization failed: %v", err)
+	}
+
+	expectedJSON := `{"name":"test","value":42}`
+	if res.Output != expectedJSON {
+		t.Errorf("JSON output: got %q, want %q", res.Output, expectedJSON)
+	}
+
+	res, _ = sdktool.JSON(nil)
+	if res.Output != "{}" {
+		t.Errorf("Nil JSON: got %q", res.Output)
+	}
+}
+
+type unmarshallable struct {
+	Ch chan int
+}
+
+func TestResultJSON_Error(t *testing.T) {
+	data := unmarshallable{Ch: make(chan int)}
+	_, err := sdktool.JSON(data)
+	if err == nil {
+		t.Error("expected JSON serialization error for unmarshallable channel field")
+	}
+}

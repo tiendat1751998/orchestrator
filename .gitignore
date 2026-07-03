@@ -1,0 +1,43 @@
+# ===== Binaries =====
+/bin/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# ===== Test =====
+*.test
+*.out
+coverage.html
+coverage.txt
+coverage.out
+
+# ===== Vendor =====
+/vendor/
+
+# ===== IDE =====
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.gemini/
+
+# ===== OS =====
+.DS_Store
+Thumbs.db
+
+# ===== Build =====
+/dist/
+/tmp/
+
+# ===== Environment =====
+.env
+.env.local
+.env.*.local
+
+# ===== Orchestrator data =====
+.orchestrator/data/
+.orchestrator/logs/
+.orchestrator/artifacts/
