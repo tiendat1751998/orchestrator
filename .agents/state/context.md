@@ -186,6 +186,13 @@ System redesigned to support a **10-year stable lifecycle** with a **57-RFC cata
 - [x] Micro-Task 4.14: Create plugins/providers/antigravity/provider.go (Implements the main Antigravity provider CLI process runner and session coordinator)
 - [x] Micro-Task 4.15: Create plugins/providers/antigravity/provider_gemini.go (Implements the native Gemini API fallback driver to communicate directly with Google's Gemini REST API endpoints)
 - [x] Micro-Task 4.16: Create plugins/providers/antigravity/provider_test.go (Implements integration unit tests for the Antigravity and Gemini provider drivers, verifying process calls, parsers, and connection sessions)
+- [x] Micro-Task 4.17: Create plugins/tools/filesystem/read_file.go (Implements file reading tool with range support and binary safety checks)
+- [x] Micro-Task 4.18: Create plugins/tools/filesystem/write_file.go (Implements file writing tool with atomic writes and directory creation)
+- [x] Micro-Task 4.19: Create plugins/tools/filesystem/list_dir.go (Implements directory lister tool listing files and folders with path traversal checks)
+- [x] Micro-Task 4.20: Create plugins/tools/filesystem/search.go (Implements file contents search tool with result capping and path exclusions)
+- [x] Micro-Task 4.21: Create plugins/tools/git/git.go (Implements git client commands stage, commit, diff, status, log wrappers)
+- [x] Micro-Task 4.22: Create plugins/tools/terminal/terminal.go (Implements terminal commands runner wrapper with security blocklists and timeouts)
+- [x] Micro-Task 4.23: Create plugins/tools/tools_test.go (Implements integration unit tests for core tools)
 
 ## Platform Availability
 - `antigravity-ide`: ✓ (current session)
